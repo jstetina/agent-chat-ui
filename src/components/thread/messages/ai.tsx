@@ -186,7 +186,7 @@ export function AssistantMessage({
           </>
         ) : (
           <>
-            {contentString.length > 0 && (
+            {contentString.length > 0 ? (
               isSubagentStreaming ? (
                 // Render subagent streaming content in a bubble (same style as ToolResult)
                 <div className="mx-auto grid max-w-3xl grid-rows-[1fr_auto] gap-2">
@@ -203,7 +203,7 @@ export function AssistantMessage({
                   <MarkdownText>{contentString}</MarkdownText>
                 </div>
               )
-            )}
+            ) : null}
 
             {!hideToolCalls && (
               <>
