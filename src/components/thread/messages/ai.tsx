@@ -191,7 +191,7 @@ export function AssistantMessage({
                 // Render subagent streaming content in a bubble (same style as ToolResult)
                 <div className="mx-auto grid max-w-3xl grid-rows-[1fr_auto] gap-2">
                   <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <div className="min-w-full bg-gray-100 p-3">
+                    <div className="min-w-full overflow-x-auto bg-gray-100 p-3">
                       <div className="prose prose-sm max-w-none">
                         <MarkdownText>{contentString}</MarkdownText>
                       </div>

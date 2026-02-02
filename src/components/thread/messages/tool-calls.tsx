@@ -36,26 +36,28 @@ export function ToolCalls({
               </h3>
             </div>
             {hasArgs ? (
-              <table className="min-w-full divide-y divide-gray-200">
-                <tbody className="divide-y divide-gray-200">
-                  {Object.entries(args).map(([key, value], argIdx) => (
-                    <tr key={argIdx}>
-                      <td className="px-4 py-2 text-sm font-medium whitespace-nowrap text-gray-900">
-                        {key}
-                      </td>
-                      <td className="px-4 py-2 text-sm text-gray-500">
-                        {isComplexValue(value) ? (
-                          <code className="rounded bg-gray-50 px-2 py-1 font-mono text-sm break-all">
-                            {JSON.stringify(value, null, 2)}
-                          </code>
-                        ) : (
-                          String(value)
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-200">
+                    {Object.entries(args).map(([key, value], argIdx) => (
+                      <tr key={argIdx}>
+                        <td className="px-4 py-2 text-sm font-medium whitespace-nowrap text-gray-900">
+                          {key}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-500">
+                          {isComplexValue(value) ? (
+                            <code className="rounded bg-gray-50 px-2 py-1 font-mono text-sm break-all">
+                              {JSON.stringify(value, null, 2)}
+                            </code>
+                          ) : (
+                            String(value)
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <code className="block p-3 text-sm">{"{}"}</code>
             )}
@@ -124,7 +126,7 @@ export function ToolResult({ message }: { message: ToolMessage }) {
             animate={{ height: "auto" }}
             transition={{ duration: 0.3 }}
           >
-            <div className="p-3">
+            <div className="overflow-x-auto p-3">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={isExpanded ? "expanded" : "collapsed"}
