@@ -484,7 +484,7 @@ export function Thread() {
                       />
 
                       <div className="flex items-center gap-6 p-2 pt-4">
-                        <div>
+                        {/* <div>
                           <div className="flex items-center space-x-2">
                             <Switch
                               id="render-tool-calls"
@@ -498,8 +498,8 @@ export function Thread() {
                               Hide Tool Calls
                             </Label>
                           </div>
-                        </div>
-                        <Label
+                        </div> */}
+                        {/* <Label
                           htmlFor="file-input"
                           className="flex cursor-pointer items-center gap-2"
                         >
@@ -515,7 +515,7 @@ export function Thread() {
                           multiple
                           accept="image/jpeg,image/png,image/gif,image/webp,application/pdf"
                           className="hidden"
-                        />
+                        /> */}
                         {stream.isLoading ? (
                           <Button
                             key="stop"
