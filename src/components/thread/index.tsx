@@ -229,7 +229,7 @@ export function Thread() {
             newHumanMessage,
           ],
         }),
-      },
+      } as any,
     );
 
     setInput("");
@@ -247,7 +247,7 @@ export function Thread() {
       streamMode: ["values"],
       streamSubgraphs: true,
       streamResumable: true,
-    });
+    } as any);
   };
 
   const chatStarted = !!threadId || !!messages.length;
