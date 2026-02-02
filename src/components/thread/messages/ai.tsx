@@ -141,33 +141,6 @@ export function AssistantMessage({
   const hasAnthropicToolCalls = !!anthropicStreamedToolCalls?.length;
   const isToolResult = message?.type === "tool";
 
-  // Detect if this is a streaming message during tool execution (subagent output)
-  // This happens when there's a previous AI message with tool_calls but no corresponding tool result yet
-  const messageIndex = message
-    ? thread.messages.findIndex((m) => m.id === message.id)
-    : -1;
-  const isSubagentStreaming = (() => {
-    if (isToolResult || !message || message.type !== "ai") return false;
-    // Look for a preceding AI message with tool_calls
-    for (let i = messageIndex - 1; i >= 0; i--) {
-      const prevMsg = thread.messages[i];
-      if (prevMsg.type === "tool") {
-        // Found a tool result before finding a tool call, not subagent streaming
-        return false;
-      }
-      if (
-        prevMsg.type === "ai" &&
-        "tool_calls" in prevMsg &&
-        prevMsg.tool_calls &&
-        prevMsg.tool_calls.length > 0
-      ) {
-        // Found a tool call without a corresponding result - this is subagent streaming
-        return true;
-      }
-    }
-    return false;
-  })();
-
   if (isToolResult && hideToolCalls) {
     return null;
   }
@@ -187,22 +160,9 @@ export function AssistantMessage({
         ) : (
           <>
             {contentString.length > 0 ? (
-              isSubagentStreaming ? (
-                // Render subagent streaming content in a bubble (same style as ToolResult)
-                <div className="mx-auto grid max-w-3xl grid-rows-[1fr_auto] gap-2">
-                  <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <div className="min-w-full overflow-x-auto bg-gray-100 p-3">
-                      <div className="prose prose-sm max-w-none">
-                        <MarkdownText>{contentString}</MarkdownText>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="py-1">
-                  <MarkdownText>{contentString}</MarkdownText>
-                </div>
-              )
+              <div className="py-1">
+                <MarkdownText>{contentString}</MarkdownText>
+              </div>
             ) : null}
 
             {!hideToolCalls && (
