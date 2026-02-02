@@ -361,8 +361,8 @@ export function Thread() {
                   }}
                 >
                   <LangGraphLogoSVG
-                    width={48}
-                    height={48}
+                    width={64}
+                    height={64}
                   />
                   <span className="text-xl font-semibold tracking-tight">
                     RHOAI Ops Buddy
@@ -436,7 +436,7 @@ export function Thread() {
                 <div className="sticky bottom-0 flex flex-col items-center gap-8 bg-white">
                   {!chatStarted && (
                     <div className="flex items-center gap-3">
-                      <LangGraphLogoSVG className="h-12 flex-shrink-0" />
+                      <LangGraphLogoSVG className="h-16 flex-shrink-0" />
                       <h1 className="text-2xl font-semibold tracking-tight">
                         RHOAI Ops Buddy
                       </h1>

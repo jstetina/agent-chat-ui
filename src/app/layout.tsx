@@ -13,6 +13,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "RHOAI Ops Buddy",
   description: "RHOAI Ops Buddy - AI Operations Assistant",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
