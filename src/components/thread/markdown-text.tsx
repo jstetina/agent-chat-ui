@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import { FC, memo, useState, useEffect, useRef } from "react";
+import { FC, memo, useState, useRef, useLayoutEffect } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { SyntaxHighlighter } from "@/components/thread/syntax-highlighter";
 
@@ -15,39 +15,47 @@ import { cn } from "@/lib/utils";
 
 import "katex/dist/katex.min.css";
 
-// Throttle hook to prevent excessive re-renders during streaming
-function useThrottledValue<T>(value: T, delay: number = 50): T {
-  const [throttledValue, setThrottledValue] = useState(value);
-  const lastUpdate = useRef(Date.now());
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+// Time-based throttle hook to prevent excessive re-renders during streaming
+// Limits updates to at most once per interval (default 100ms)
+function useThrottledValue(value: string, intervalMs: number = 100): string {
+  const [displayValue, setDisplayValue] = useState(value);
+  const lastUpdateTime = useRef(0);
+  const pendingUpdate = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestValue = useRef(value);
 
-  useEffect(() => {
+  // Always track the latest incoming value
+  latestValue.current = value;
+
+  useLayoutEffect(() => {
     const now = Date.now();
-    const timeSinceLastUpdate = now - lastUpdate.current;
+    const timeSinceLastUpdate = now - lastUpdateTime.current;
 
-    if (timeSinceLastUpdate >= delay) {
-      // Enough time has passed, update immediately
-      setThrottledValue(value);
-      lastUpdate.current = now;
-    } else {
-      // Schedule an update for later
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        setThrottledValue(value);
-        lastUpdate.current = Date.now();
-      }, delay - timeSinceLastUpdate);
+    if (timeSinceLastUpdate >= intervalMs) {
+      // Enough time passed - update immediately
+      lastUpdateTime.current = now;
+      setDisplayValue(value);
+    } else if (pendingUpdate.current === null) {
+      // Schedule update for when throttle period ends
+      const delay = intervalMs - timeSinceLastUpdate;
+      pendingUpdate.current = setTimeout(() => {
+        pendingUpdate.current = null;
+        lastUpdateTime.current = Date.now();
+        setDisplayValue(latestValue.current);
+      }, delay);
     }
+    // If there's already a pending update, it will use latestValue.current
+  }, [value, intervalMs]);
 
+  // Cleanup on unmount
+  useLayoutEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (pendingUpdate.current !== null) {
+        clearTimeout(pendingUpdate.current);
       }
     };
-  }, [value, delay]);
+  }, []);
 
-  return throttledValue;
+  return displayValue;
 }
 
 interface CodeHeaderProps {
@@ -281,7 +289,8 @@ const defaultComponents: any = {
 const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
   // Throttle content updates to prevent excessive re-renders during streaming
   // This helps avoid "Maximum update depth exceeded" errors when LLM generates tables
-  const throttledContent = useThrottledValue(children, 50);
+  // 100ms throttle = max 10 updates/second, balancing responsiveness with stability
+  const throttledContent = useThrottledValue(children, 100);
 
   return (
     <div className="markdown-content">
