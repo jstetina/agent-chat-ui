@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import { FC, memo, useState } from "react";
+import { FC, memo, useState, useEffect, useRef } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { SyntaxHighlighter } from "@/components/thread/syntax-highlighter";
 
@@ -14,6 +14,41 @@ import { TooltipIconButton } from "@/components/thread/tooltip-icon-button";
 import { cn } from "@/lib/utils";
 
 import "katex/dist/katex.min.css";
+
+// Throttle hook to prevent excessive re-renders during streaming
+function useThrottledValue<T>(value: T, delay: number = 50): T {
+  const [throttledValue, setThrottledValue] = useState(value);
+  const lastUpdate = useRef(Date.now());
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const now = Date.now();
+    const timeSinceLastUpdate = now - lastUpdate.current;
+
+    if (timeSinceLastUpdate >= delay) {
+      // Enough time has passed, update immediately
+      setThrottledValue(value);
+      lastUpdate.current = now;
+    } else {
+      // Schedule an update for later
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setThrottledValue(value);
+        lastUpdate.current = Date.now();
+      }, delay - timeSinceLastUpdate);
+    }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [value, delay]);
+
+  return throttledValue;
+}
 
 interface CodeHeaderProps {
   language?: string;
@@ -244,6 +279,10 @@ const defaultComponents: any = {
 };
 
 const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
+  // Throttle content updates to prevent excessive re-renders during streaming
+  // This helps avoid "Maximum update depth exceeded" errors when LLM generates tables
+  const throttledContent = useThrottledValue(children, 50);
+
   return (
     <div className="markdown-content">
       <ReactMarkdown
@@ -251,7 +290,7 @@ const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
         rehypePlugins={[rehypeKatex]}
         components={defaultComponents}
       >
-        {children}
+        {throttledContent}
       </ReactMarkdown>
     </div>
   );
