@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from "react";
 import { useStream } from "@langchain/langgraph-sdk/react";
-import { type Message } from "@langchain/langgraph-sdk";
+import { type Message, type Checkpoint } from "@langchain/langgraph-sdk";
 import {
   uiMessageReducer,
   isUIMessage,
@@ -39,7 +39,20 @@ const useTypedStream = useStream<
   }
 >;
 
-type StreamContextType = ReturnType<typeof useTypedStream>;
+// Extend the base type to include getMessagesMetadata which exists at runtime
+// but is not included in the SDK's TypeScript definitions
+type MessageMetadata = {
+  firstSeenState?: {
+    parent_checkpoint?: Checkpoint | null;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+};
+
+type BaseStreamType = ReturnType<typeof useTypedStream>;
+type StreamContextType = BaseStreamType & {
+  getMessagesMetadata: (message: Message) => MessageMetadata | undefined;
+};
 const StreamContext = createContext<StreamContextType | undefined>(undefined);
 
 async function sleep(ms = 4000) {
@@ -120,7 +133,7 @@ const StreamSession = ({
   }, [apiKey, apiUrl]);
 
   return (
-    <StreamContext.Provider value={streamValue}>
+    <StreamContext.Provider value={streamValue as StreamContextType}>
       {children}
     </StreamContext.Provider>
   );
