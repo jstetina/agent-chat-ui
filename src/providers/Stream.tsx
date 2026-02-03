@@ -54,6 +54,7 @@ type MessageMetadata = {
 type BaseStreamType = ReturnType<typeof useTypedStream>;
 type StreamContextType = BaseStreamType & {
   getMessagesMetadata: (message: Message) => MessageMetadata | undefined;
+  setBranch: (branch: string) => void;
 };
 const StreamContext = createContext<StreamContextType | undefined>(undefined);
 
