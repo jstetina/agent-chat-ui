@@ -46,6 +46,8 @@ type MessageMetadata = {
     parent_checkpoint?: Checkpoint | null;
     [key: string]: unknown;
   };
+  branch?: string;
+  branchOptions?: string[];
   [key: string]: unknown;
 };
 
