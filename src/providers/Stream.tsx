@@ -44,6 +44,7 @@ const useTypedStream = useStream<
 type MessageMetadata = {
   firstSeenState?: {
     parent_checkpoint?: Checkpoint | null;
+    values?: StateType;
     [key: string]: unknown;
   };
   branch?: string;

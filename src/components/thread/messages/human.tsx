@@ -60,7 +60,7 @@ export function HumanMessage({
         streamMode: ["values"],
         streamSubgraphs: true,
         streamResumable: true,
-        optimisticValues: (prev) => {
+        optimisticValues: (prev: { messages?: Message[] }) => {
           const values = meta?.firstSeenState?.values;
           if (!values) return prev;
 
@@ -69,7 +69,7 @@ export function HumanMessage({
             messages: [...(values.messages ?? []), newMessage],
           };
         },
-      },
+      } as any,
     );
   };
 
